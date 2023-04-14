@@ -1,0 +1,5 @@
+SNS:
+  head: "sns/*"
+
+CLW:
+  head: "client-web/*"
