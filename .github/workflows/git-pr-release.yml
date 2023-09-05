@@ -2,22 +2,27 @@ name: git-pr-release
 on:
   push:
     branches:
-      - develop
+      - release/**
 jobs:
   git-pr-release:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
         with:
-          fetch-depth: 0 # git-pr-release needs the git histories
-      - uses: actions/setup-ruby@v1
+          fetch-depth: 0
+      - name: Set up Ruby 3.1
+        uses: actions/setup-ruby@v1
         with:
           ruby-version: 3.1
+      - name: Setup vars
+        id: vars
+        run: |
+          echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
       - run: gem install --no-document git-pr-release
       - run: git-pr-release
         env:
           GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_PR_RELEASE_BRANCH_PRODUCTION: main # YOUTRUSTとは異なる
-          GIT_PR_RELEASE_BRANCH_STAGING: develop
+          GIT_PR_RELEASE_BRANCH_STAGING: ${{ steps.vars.outputs.branch_name }}
           GIT_PR_RELEASE_LABELS: リリース用
           GIT_PR_RELEASE_TEMPLATE: .github/RELEASE_PULL_REQUEST_TEMPLATE.erb
