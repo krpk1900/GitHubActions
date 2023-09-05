@@ -1,0 +1,23 @@
+name: git-pr-release
+on:
+  push:
+    branches:
+      - release/**
+jobs:
+  git-pr-release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0 # git-pr-release needs the git histories
+      - uses: actions/setup-ruby@v1
+        with:
+          ruby-version: 3.1
+      - run: gem install --no-document git-pr-release
+      - run: git-pr-release
+        env:
+          GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: main # YOUTRUSTとは異なる
+          GIT_PR_RELEASE_BRANCH_STAGING: release/**
+          GIT_PR_RELEASE_LABELS: リリース用
+          GIT_PR_RELEASE_TEMPLATE: .github/RELEASE_PULL_REQUEST_TEMPLATE.md
