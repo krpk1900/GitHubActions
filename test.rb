@@ -1,4 +1,23 @@
 # test1です
+<<<<<<< HEAD
 # testgs
 # update
 # deleteを追加
+=======
+# test2です
+# test3です
+# test4です
+# test5です
+# test6です
+# test7です
+# test8です
+# test9です
+# test10です
+# test11です
+# test12です
+# test13です
+# test14です
+# test15です
+# test16です
+# test17です
+>>>>>>> 61f4a4426e6251b47518f445d8739c962122479e

@@ -1,12 +1,4 @@
-<% feature_name = nil %>
-<% pull_requests.reverse_each do |pr| %>
-  <% match_data = pr.title.match(/\[(.*?)\]/) %>
-  <% if match_data %>
-    <% feature_name = match_data.captures.first %>
-    <% break %>
-  <% end %>
-<% end %>
-[<%= feature_name %>] リリース用PR
+[<%= pull_requests.reverse.find{ |pr| pr.title.match(/\[(.*?)\]/) }&.title&.match(/\[(.*?)\]/)&.captures&.first || '' %>] リリース用PR
 ## 📝 概要
 
 
