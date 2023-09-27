@@ -3,3 +3,6 @@ SNS:
 
 CLW:
   head: "client-web/*"
+
+Admin:
+  head: "admin/*"
