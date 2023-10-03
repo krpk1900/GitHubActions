@@ -5,7 +5,9 @@
 
 ## 📌 リリース予定のPR一覧
 <% pull_requests.each do |pr| -%>
-- #<%=  pr.number %> <%= pr.mention %>
+  <% if pr.merged == true %>
+  - #<%=  pr.number %> <%= pr.mention %>
+  <% end %>
 <% end -%>
 
 ## マイルストーンや仕様書などのURL
