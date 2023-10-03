@@ -17,8 +17,19 @@ jobs:
       - name: Set up Branch Name
         id: vars
         run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+      - name: Check if PR already exists and is open
+        id: check_pr
+        run: |
+          PR_EXISTS=$(curl -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+          "https://api.github.com/repos/${{ github.repository }}/pulls?head=${{ github.repository_owner }}:${{ steps.vars.outputs.branch_name }}" | \
+          jq '[.[] | select(.state == "open")] | length')
+          echo "::set-output name=pr_exists::$PR_EXISTS"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: gem install --no-document git-pr-release
+        if: steps.check_pr.outputs.pr_exists == 0
       - run: git-pr-release
+        if: steps.check_pr.outputs.pr_exists == 0
         env:
           GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GIT_PR_RELEASE_BRANCH_PRODUCTION: main # YOUTRUSTとは異なる
