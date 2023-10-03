@@ -14,10 +14,9 @@ jobs:
         uses: actions/setup-ruby@v1
         with:
           ruby-version: 3.1
-      - name: Setup vars
+      - name: Set up Branch Name
         id: vars
-        run: |
-          echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+        run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
       - run: gem install --no-document git-pr-release
       - run: git-pr-release
         env:
