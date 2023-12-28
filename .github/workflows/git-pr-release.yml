@@ -37,6 +37,11 @@ jobs:
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # 調査のため
+      - name: Debug
+        run: |
+          echo "Current branch: ${{ steps.vars.outputs.branch_name }}"
+          echo "PR_DATA: $PR_DATA"
       # git-pr-releaseをインストールする
       - name: Install git-pr-release
         run: gem install --no-document git-pr-release
