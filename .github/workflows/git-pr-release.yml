@@ -18,21 +18,20 @@ jobs:
         uses: actions/setup-ruby@v1
         with:
           ruby-version: 3.1
-      # sns/aaa から release/bbb へのpushの場合、release/bbbを変数に保存する
+      # release/ph1 から release/ph2 へのpush(pull)の場合、release/ph2を変数に保存する
       - name: Set up base branch name
         id: base_branch
         run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
-      # release/bbb から release/ccc へのPRが存在する場合、release/cccを変数に保存する。存在しない場合はmainを保存する
+      # release/ph2 から出ているPRがすでに存在する場合、向き先のブランチ(release/ph1)を変数に保存する。
+      # PRがまだ存在しない場合は、mainを保存する。
       - name: Set up head branch name
         id: head_branch
         run: |
           BASE_BRANCH=${{ steps.base_branch.outputs.branch_name }}
           HEAD_BRANCH=$(gh pr list --head $BASE_BRANCH --json baseRefName --jq '.[0].baseRefName')
           if [[ -n "$HEAD_BRANCH" ]]; then
-            echo "Found PR from $BASE_BRANCH to $HEAD_BRANCH"
             echo "::set-output name=branch_name::$HEAD_BRANCH"
           else
-            echo "No PR found from $BASE_BRANCH to release/**. Setting to main"
             echo "::set-output name=branch_name::main"
           fi
         env:
