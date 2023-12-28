@@ -22,8 +22,7 @@ jobs:
         run: |
           CURRENT_BRANCH=${{ steps.vars.outputs.branch_name }}
           PR_DATA=$(gh pr list --base release/** --head $CURRENT_BRANCH --json baseRefName --jq '.[0].baseRefName')
-          if [[ -n "$PR_DATA" ]]; then
-            echo "aaa"
+          echo "$PR_DATA"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: gem install --no-document git-pr-release
