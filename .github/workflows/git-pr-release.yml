@@ -26,7 +26,7 @@ jobs:
         continue-on-error: true
         env:
           GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_PR_RELEASE_BRANCH_PRODUCTION: master
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: main
           GIT_PR_RELEASE_BRANCH_STAGING: ${{ steps.vars.outputs.branch_name }}
           GIT_PR_RELEASE_LABELS: リリース用
           GIT_PR_RELEASE_TEMPLATE: .github/RELEASE_PULL_REQUEST_TEMPLATE.erb
