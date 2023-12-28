@@ -17,6 +17,19 @@ jobs:
       - name: Set up Branch Name
         id: vars
         run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
+      - name: Check for PR from current branch to release/** and set branch name
+        id: check_branch
+        run: |
+          CURRENT_BRANCH=${{ steps.vars.outputs.branch_name }}
+          PR_DATA=$(gh pr list --base release/** --head $CURRENT_BRANCH --json baseRefName --jq '.[0].baseRefName')
+          if [[ -n "$PR_DATA" ]]; then
+            echo "Found PR from $CURRENT_BRANCH to $PR_DATA"
+            echo "::set-output name=branch_name::$PR_DATA"
+          else
+            echo "No PR found from $CURRENT_BRANCH to release/**. Setting to master"
+            echo "::set-output name=branch_name::master"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - run: gem install --no-document git-pr-release
       - name: Run git-pr-release and capture output
         id: gitpr
@@ -26,7 +39,7 @@ jobs:
         continue-on-error: true
         env:
           GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_PR_RELEASE_BRANCH_PRODUCTION: main
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: ${{ steps.check_branch.outputs.branch_name }} #main
           GIT_PR_RELEASE_BRANCH_STAGING: ${{ steps.vars.outputs.branch_name }}
           GIT_PR_RELEASE_LABELS: リリース用
           GIT_PR_RELEASE_TEMPLATE: .github/RELEASE_PULL_REQUEST_TEMPLATE.erb
