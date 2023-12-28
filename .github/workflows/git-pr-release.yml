@@ -1,3 +1,4 @@
+# release/**ブランチにpushされると、リリース用のPRを自動で生成するためのJob
 name: git-pr-release
 on:
   push:
@@ -7,17 +8,22 @@ jobs:
   git-pr-release:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      # ソースコードをランナーにコピーする
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Set up Ruby 3.1
+      # Rubyのセットアップ
+      - name: Set up Ruby
         uses: actions/setup-ruby@v1
         with:
           ruby-version: 3.1
-      - name: Set up Branch Name
+      # sns/aaa から release/bbb へのpushの場合、release/bbbを変数に保存する
+      - name: Set up current branch name
         id: vars
         run: echo "::set-output name=branch_name::${GITHUB_REF#refs/heads/}"
-      - name: Check for PR from current branch to release/** and set branch name
+      # release/bbb から release/ccc へのPRが存在する場合、release/cccを変数に保存する。存在しない場合はmainを保存する
+      - name: Check for PR from current branch to release/** and set target branch name
         id: check_branch
         run: |
           CURRENT_BRANCH=${{ steps.vars.outputs.branch_name }}
@@ -26,12 +32,15 @@ jobs:
             echo "Found PR from $CURRENT_BRANCH to $PR_DATA"
             echo "::set-output name=branch_name::$PR_DATA"
           else
-            echo "No PR found from $CURRENT_BRANCH to release/**. Setting to master"
-            echo "::set-output name=branch_name::master"
+            echo "No PR found from $CURRENT_BRANCH to release/**. Setting to main"
+            echo "::set-output name=branch_name::main"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - run: gem install --no-document git-pr-release
+      # git-pr-releaseをインストールする
+      - name: Install git-pr-release
+        run: gem install --no-document git-pr-release
+      # git-pr-releaseを実行し、結果をoutput.txtに保存する
       - name: Run git-pr-release and capture output
         id: gitpr
         run: |
@@ -40,10 +49,11 @@ jobs:
         continue-on-error: true
         env:
           GIT_PR_RELEASE_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          GIT_PR_RELEASE_BRANCH_PRODUCTION: ${{ steps.check_branch.outputs.branch_name }} #main
+          GIT_PR_RELEASE_BRANCH_PRODUCTION: ${{ steps.check_branch.outputs.branch_name }}
           GIT_PR_RELEASE_BRANCH_STAGING: ${{ steps.vars.outputs.branch_name }}
           GIT_PR_RELEASE_LABELS: リリース用
           GIT_PR_RELEASE_TEMPLATE: .github/RELEASE_PULL_REQUEST_TEMPLATE.erb
+      # 既知のエラーの場合は成功とみなすために、git-pr-releaseの結果に特定のエラーメッセージが含まれているかを確認する
       - name: Check for specific error message
         id: check
         run: |
@@ -57,6 +67,7 @@ jobs:
             echo "Did not find the specific error or success, setting job status to fail."
             echo "::set-output name=status::fail"
           fi
+      # 既知ではないエラーが発生した場合は、ジョブを失敗させる
       - name: Conditionally fail the job
         run: |
           if [[ "${{ steps.check.outputs.status }}" == "fail" ]]; then
